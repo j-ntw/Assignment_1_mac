@@ -162,17 +162,6 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
     }
 
     file.close();
-    // print verList and triList to file
-    ofstream outputfile;
-    outputfile.open("../data/output.txt");
-    for (int i = 0; i < verList.size(); i += 6)
-    {
-        outputfile << "v " << verList[i] << " " << verList[i + 1] << " " << verList[i + 2] << " " << verList[i + 3] << " " << verList[i + 4] << " " << verList[i + 5] << endl;
-    }
-    for (int i = 0; i < triList.size(); i += 3)
-    {
-        outputfile << "f " << triList[i] << " " << triList[i + 1] << " " << triList[i + 2] << endl;
-    }
     return 0;
 }
 
@@ -185,16 +174,19 @@ void SetMeshColor(int &colorID)
 // TODO: insert your code in this function for Mesh Transformation (Rotation)
 void RotateModel(float angle, glm::vec3 axis)
 {
+    modelMatrix = glm::rotate(modelMatrix, angle, axis);
 }
 
 // TODO: insert your code in this function for Mesh Transformation (Translation)
 void TranslateModel(glm::vec3 transVec)
 {
+    modelMatrix = glm::translate(modelMatrix, transVec);
 }
 
 // TODO: insert your code in this function for Mesh Transformation (Scaling)
 void ScaleModel(float scale)
 {
+    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale, scale, scale));
 }
 
 /******************************************************************************/
