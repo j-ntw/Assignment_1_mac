@@ -135,14 +135,16 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
         {
             // f a/b/c d/e/f g/h/i
             // we only store a, d and g
-            stringstream ss(line);
+
+            // remove f
+            stringstream ss(line.substr(2));
             string f, g, abc, a, bc;
             char delimiter = '/';
-            ss >> f >> g;
-            for (int i = 0; i < 3; i++)
+
+            while (ss >> abc)
             {
                 // get triplet
-                stringstream(g) >> abc >> g;
+                stringstream(g) >> abc;
                 // get first number
                 stringstream(abc) >> a >> delimiter;
                 triList.push_back(stoi(a) - 1);
