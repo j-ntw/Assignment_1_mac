@@ -87,36 +87,98 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
 {
     // read input file
     string inputfile;
-    cout << "Please enter the input file name: ";
-    cin >> inputfile;
+    // cout << "Please enter the input file name: ";
+    // cin >> inputfile;
+
     // concatenate the file path
-    string filepath = "data/" + inputfile;
+    // FIXME: remove hardcode of the inputfile
+    inputfile = "garg.obj";
+    string filepath = "../data/" + inputfile;
     ifstream file(filepath);
     if (!file.is_open())
     {
         cout << "Error: File not found" << endl;
         return -1;
     }
+
     // print file content
     string line;
+    vector<float> vList;  // internal storage for vertices
+    vector<float> vnList; // internal storage for normals
     while (getline(file, line))
     {
-        cout << line << endl;
+        // cout << line << endl;
+        // get normals in vnlist
+        if (line[0] == 'v' && line[1] == 'n')
+        {
+            stringstream ss(line);
+            string v;
+            float x, y, z;
+            ss >> v >> x >> y >> z;
+            vnList.push_back(x);
+            vnList.push_back(y);
+            vnList.push_back(z);
+        }
+        // starts with v, push floats to vList
+        else if (line[0] == 'v')
+        {
+            stringstream ss(line);
+            string v;
+            float x, y, z;
+            ss >> v >> x >> y >> z;
+            vList.push_back(x);
+            vList.push_back(y);
+            vList.push_back(z);
+        }
+        // starts with f, push indices to triList
+        else if (line[0] == 'f')
+        {
+            // f a/b/c d/e/f g/h/i
+            // we only store a, d and g
+            stringstream ss(line);
+            string f, g, abc, a, bc;
+            char delimiter = '/';
+            ss >> f >> g;
+            for (int i = 0; i < 3; i++)
+            {
+                // get triplet
+                stringstream(g) >> abc >> g;
+                // get first number
+                stringstream(abc) >> a >> delimiter;
+                triList.push_back(stoi(a) - 1);
+            }
+        }
     }
+    // combine vList and vnList to verList
+    for (int i = 0; i < vList.size(); i += 3)
+    {
+        verList.push_back(vList[i]);
+        verList.push_back(vList[i + 1]);
+        verList.push_back(vList[i + 2]);
+        verList.push_back(vnList[i]);
+        verList.push_back(vnList[i + 1]);
+        verList.push_back(vnList[i + 2]);
+    }
+
     file.close();
-    // fill in the verList and triList
-
-    // Note: these two lines of code is to avoid runtime error;
-    //       please remove them after you fill your own code for 3D model loading
-    verList.push_back(0);
-    triList.push_back(0);
-
+    // print verList and triList to file
+    ofstream outputfile;
+    outputfile.open("../data/output.txt");
+    for (int i = 0; i < verList.size(); i += 6)
+    {
+        outputfile << "v " << verList[i] << " " << verList[i + 1] << " " << verList[i + 2] << " " << verList[i + 3] << " " << verList[i + 4] << " " << verList[i + 5] << endl;
+    }
+    for (int i = 0; i < triList.size(); i += 3)
+    {
+        outputfile << "f " << triList[i] << " " << triList[i + 1] << " " << triList[i + 2] << endl;
+    }
     return 0;
 }
 
 // TODO: insert your code in this function for Mesh Coloring
 void SetMeshColor(int &colorID)
 {
+    colorID = (colorID + 1) % 4;
 }
 
 // TODO: insert your code in this function for Mesh Transformation (Rotation)
