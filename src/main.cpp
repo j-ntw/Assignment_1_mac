@@ -87,12 +87,10 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
 {
     // read input file
     string inputfile;
-    // cout << "Please enter the input file name: ";
-    // cin >> inputfile;
+    cout << "Please enter the input file name: ";
+    cin >> inputfile;
 
     // concatenate the file path
-    // FIXME: remove hardcode of the inputfile
-    inputfile = "garg.obj";
     string filepath = "../data/" + inputfile;
     ifstream file(filepath);
     if (!file.is_open())
@@ -103,11 +101,11 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
 
     // print file content
     string line;
-    vector<float> vList;  // internal storage for vertices
-    vector<float> vnList; // internal storage for normals
+    vector<float> vList;              // internal storage for vertices
+    vector<float> vnList;             // internal storage for normals
+    unordered_map<int, int> v_vn_map; // internal hashmap for indices of vertices and normals
     while (getline(file, line))
     {
-        // cout << line << endl;
         // get normals in vnlist
         if (line[0] == 'v' && line[1] == 'n')
         {
@@ -120,7 +118,7 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
             vnList.push_back(z);
         }
         // starts with v, push floats to vList
-        else if (line[0] == 'v')
+        else if (line[0] == 'v' && line[1] == ' ')
         {
             stringstream ss(line);
             string v;
@@ -134,34 +132,41 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
         else if (line[0] == 'f')
         {
             // f a/b/c d/e/f g/h/i
-            // we only store a, d and g
+            // we store a, d and g in triList
+            // and store c, f and i in iList
 
             // remove f
             stringstream ss(line.substr(2));
 
-            string g, abc, a;
+            string abc;
+            unsigned int a, b, c;
             char delimiter = '/';
 
             while (ss >> abc)
             {
-                // get first number
-                stringstream(abc) >> a >> delimiter;
-                triList.push_back(stoi(a) - 1);
+                // get first number, ignore b, get third number
+                stringstream(abc) >> a >> delimiter >> b >> delimiter >> c;
+                triList.push_back(a - 1);
+                v_vn_map[a - 1] = c - 1;
             }
         }
     }
-    // combine vList and vnList to verList
+    // combine vList and vnList to verList using triList
     for (int i = 0; i < vList.size(); i += 3)
     {
-        verList.push_back(vList[i]);
+        verList.push_back(vList[i]); // use the vertex index from vList
         verList.push_back(vList[i + 1]);
         verList.push_back(vList[i + 2]);
-        verList.push_back(vnList[i]);
-        verList.push_back(vnList[i + 1]);
-        verList.push_back(vnList[i + 2]);
+        verList.push_back(vnList[v_vn_map[i]]); // use the normal index from v_vn_map
+        verList.push_back(vnList[v_vn_map[i + 1]]);
+        verList.push_back(vnList[v_vn_map[i + 2]]);
     }
 
     file.close();
+    cout << "size of vList: " << vList.size() << endl;
+    cout << "size of vnList: " << vnList.size() << endl;
+    cout << "size of verList: " << verList.size() << endl;
+    cout << "size of triList: " << triList.size() << endl;
     return 0;
 }
 
