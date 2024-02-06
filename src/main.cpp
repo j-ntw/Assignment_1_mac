@@ -129,11 +129,11 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
             vList.push_back(z);
         }
         // starts with f, push indices to triList
-        else if (line[0] == 'f')
+        else if (line[0] == 'f' && line[1] == ' ')
         {
             // f a/b/c d/e/f g/h/i
             // we store a, d and g in triList
-            // and store c, f and i in iList
+            // and store a: c, d: f, g: i in v_vn_map
 
             // remove f
             stringstream ss(line.substr(2));
@@ -154,19 +154,29 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
     // combine vList and vnList to verList using triList
     for (int i = 0; i < vList.size(); i += 3)
     {
+        int nIndex = v_vn_map[i];
         verList.push_back(vList[i]); // use the vertex index from vList
         verList.push_back(vList[i + 1]);
         verList.push_back(vList[i + 2]);
-        verList.push_back(vnList[v_vn_map[i]]); // use the normal index from v_vn_map
-        verList.push_back(vnList[v_vn_map[i + 1]]);
-        verList.push_back(vnList[v_vn_map[i + 2]]);
+        verList.push_back(vnList[nIndex]); // use the normal index from v_vn_map
+        verList.push_back(vnList[nIndex + 1]);
+        verList.push_back(vnList[nIndex + 2]);
     }
 
     file.close();
-    cout << "size of vList: " << vList.size() << endl;
-    cout << "size of vnList: " << vnList.size() << endl;
-    cout << "size of verList: " << verList.size() << endl;
-    cout << "size of triList: " << triList.size() << endl;
+    // print verList and triList into output file
+    ofstream outputfile;
+    outputfile.open("../data/output.txt");
+    for (int i = 0; i < verList.size(); i += 6)
+    {
+        outputfile << "v " << verList[i] << " " << verList[i + 1] << " " << verList[i + 2] << endl;
+        outputfile << "vn " << verList[i + 3] << " " << verList[i + 4] << " " << verList[i + 5] << endl;
+    } // for
+    for (int i = 0; i < triList.size(); i += 3)
+    {
+        outputfile << "f " << triList[i] << " " << triList[i + 1] << " " << triList[i + 2] << endl;
+    } // for
+
     return 0;
 }
 
