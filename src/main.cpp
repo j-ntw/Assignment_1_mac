@@ -13,6 +13,8 @@
 #include <sstream>
 #include <vector>
 #include <fstream>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/string_cast.hpp>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -186,19 +188,35 @@ void SetMeshColor(int &colorID)
 // TODO: insert your code in this function for Mesh Transformation (Rotation)
 void RotateModel(float angle, glm::vec3 axis)
 {
-    modelMatrix = glm::rotate(modelMatrix, angle, axis);
+    // get an identity matrix
+    glm::mat4 transformationMatrix = glm::mat4(1.0f);
+    // rotate the transformation matrix
+    transformationMatrix = glm::rotate(transformationMatrix, angle, axis);
+    // multiply the transformation matrix with the model matrix
+    modelMatrix = transformationMatrix * modelMatrix;
 }
 
 // TODO: insert your code in this function for Mesh Transformation (Translation)
 void TranslateModel(glm::vec3 transVec)
 {
-    modelMatrix = glm::translate(modelMatrix, transVec);
+    // get an identity matrix
+    glm::mat4 transformationMatrix = glm::mat4(1.0f);
+    // translate the transformation matrix
+    transformationMatrix = glm::translate(transformationMatrix, transVec);
+    // multiply the transformation matrix with the model matrix
+    modelMatrix = transformationMatrix * modelMatrix;
+    // cout << glm::to_string(modelMatrix) << endl;
 }
 
 // TODO: insert your code in this function for Mesh Transformation (Scaling)
 void ScaleModel(float scale)
 {
-    modelMatrix = glm::scale(modelMatrix, glm::vec3(scale, scale, scale));
+    // get an identity matrix
+    glm::mat4 transformationMatrix = glm::mat4(1.0f);
+    // scale the transformation matrix
+    transformationMatrix = glm::scale(transformationMatrix, glm::vec3(scale, scale, scale));
+    // multiply the transformation matrix with the model matrix
+    modelMatrix = transformationMatrix * modelMatrix;
 }
 
 /******************************************************************************/
@@ -233,6 +251,10 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     if (key == GLFW_KEY_C && action == GLFW_PRESS)
     {
         SetMeshColor(colorID);
+    }
+    else if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    {
+        modelMatrix = glm::mat4(1.0f);
     }
 }
 
