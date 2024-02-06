@@ -145,9 +145,13 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
             while (ss >> abc)
             {
                 // get first number, ignore b, get third number
+                // these numbers represent line numbers of v, vt, vn
                 stringstream(abc) >> a >> delimiter >> b >> delimiter >> c;
                 triList.push_back(a - 1);
-                v_vn_map[a - 1] = c - 1;
+
+                // when mapping v to vn, we must multiply by 3
+                // since the face list gives line numbers but we stored xyz triplets as a flat array
+                v_vn_map[3 * (a - 1)] = 3 * (c - 1);
             }
         }
     }
@@ -161,25 +165,15 @@ int LoadInput(vector<float> &verList, vector<unsigned> &triList)
 
         // use the vertex index to get the normal index from v_vn_map
         // then use the normal index to get the normal from vnList
+
         // iterate over vertex index, since verList is ordered by vertex index.
-        verList.push_back(vnList[v_vn_map[i]]);
-        verList.push_back(vnList[v_vn_map[i + 1]]);
-        verList.push_back(vnList[v_vn_map[i + 2]]);
+        int vnIndex = v_vn_map[i];
+        verList.push_back(vnList[vnIndex]);
+        verList.push_back(vnList[vnIndex + 1]);
+        verList.push_back(vnList[vnIndex + 2]);
     }
 
     file.close();
-    // print verList and triList into output file
-    ofstream outputfile;
-    outputfile.open("../data/output.txt");
-    for (int i = 0; i < verList.size(); i += 6)
-    {
-        outputfile << "v, vn " << verList[i] << " " << verList[i + 1] << " " << verList[i + 2] << " " << verList[i + 3] << " " << verList[i + 4] << " " << verList[i + 5] << endl;
-    }
-    for (int i = 0; i < triList.size(); i += 3)
-    {
-        outputfile << "f " << triList[i] << " " << triList[i + 1] << " " << triList[i + 2] << endl;
-    }
-    outputfile.close();
     return 0;
 }
 
